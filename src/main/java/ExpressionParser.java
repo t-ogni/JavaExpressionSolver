@@ -96,8 +96,8 @@ public class ExpressionParser {
 
     /*
     * in > 2 + 3 - sin(4*5)
-    * out < [
-    *       [c, 2]
+    * out < [   ... в обратном порядке
+    *       [c, 2]  ... это конец списка
     *       [c, 3]
     *       [op, +]
     *       [c, 4]
@@ -110,41 +110,70 @@ public class ExpressionParser {
 
 
     public Expression parse(String expr) {
-        Deque<TokenLexeme> ReversePolish = this.tokenize(expr);
+        Deque<TokenLexeme> ReversePolish = this.tokenize(expr);  // пример входных и выходных выше
+        Deque<Expression> Expressions = new ArrayDeque<>();
         Iterator<TokenLexeme> itr = ReversePolish.descendingIterator();
+
         while (itr.hasNext()) {
             TokenLexeme token = itr.next();
 //            System.out.println(token);
-            Expression exp;
             switch (token.token){
                 case Const:
-                    exp = new NumberExpression(Double.parseDouble(token.lexeme));
+                    Expressions.push(new NumberExpression(Double.parseDouble(token.lexeme)));
                     break;
                 case Variable:
-                    exp = new VariableExpression(token.lexeme);
+                    Expressions.push(new VariableExpression(token.lexeme));
                     break;
                 case Operator:
+                    Expression Rvalue = Expressions.pop();
+                    Expression Lvalue = Expressions.pop();
                     switch (token.lexeme){
                         case "+":
-                            exp = new AddExpression();
+                            Expressions.push(new AddExpression(Lvalue,Rvalue));
                             break;
                         case "-":
-                            exp = new SubtractExpression();
+                            Expressions.push(new SubtractExpression(Lvalue,Rvalue));
                             break;
                         case "*":
-                            exp = new MultiplyExpression();
+                            Expressions.push(new MultiplyExpression(Lvalue, Rvalue));
                             break;
                         case "/":
-                            exp = new DivideExpression();
+                            Expressions.push(new DivideExpression(Lvalue, Rvalue));
                             break;
                         default:
+                            System.out.println("No matching operator found: "+token.lexeme);
                             break;
                     }
                     break;
                 case UnaryFunction:
+                    switch (token.lexeme) {
+                        case "sin":
+                            Expressions.push(new SinExpression(Expressions.pop()));
+                            break;
+                        case "cos":
+                            Expressions.push(new CosExpression(Expressions.pop()));
+                            break;
+                        case "tan":
+                            Expressions.push(new TanExpression(Expressions.pop()));
+                            break;
+                        default:
+                            System.out.println("No matching UnaryFunction found: "+token.lexeme);
+                            break;
+                    }
+                    break;
                 case PostfixFunction:
+                    switch (token.lexeme) {
+                        case "!":
+                            Expressions.push(new FactorialExpression(Expressions.pop()));
+                            break;
+                        default:
+                            System.out.println("No matching PostfixFunction found: "+token.lexeme);
+                            break;
+                    }
+                    break;
             }
         }
-        return null;
+
+        return Expressions.pop();
     }
 }
