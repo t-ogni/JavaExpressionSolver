@@ -1,12 +1,12 @@
+package Solver.Expr.Binary;
+
+import Solver.Expr.Expression;
 import java.util.Map;
 
-public class MultiplyExpression implements Expression {
-    private final Expression leftExpression;
-    private final Expression rightExpression;
+public class MultiplyExpression extends BinaryExpression {
 
     public MultiplyExpression(Expression leftExpression, Expression rightExpression) {
-        this.leftExpression = leftExpression;
-        this.rightExpression = rightExpression;
+        super(leftExpression, rightExpression);
     }
 
     @Override

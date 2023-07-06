@@ -1,3 +1,6 @@
+package Solver.Expr.Unary;
+
+import Solver.Expr.Expression;
 import java.util.Map;
 
 public class TanExpression implements Expression {
